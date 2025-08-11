@@ -1,0 +1,398 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chambers — UI Starter</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header>
+  <h1>Chambers — UI Starter</h1>
+  <div class="controls">
+    <label>API URL: <input id="apiUrl" value="http://localhost:8000" /></label>
+    <button id="saveApi">Save</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="chat" class="active">Chat</button>
+  <button data-tab="workflow">Workflow</button>
+  <button data-tab="matters">Matters</button>
+  <button data-tab="initial">Initial Review</button>
+  <button data-tab="drafter">Drafter</button>
+  <button data-tab="editor">Editor</button>
+  <button data-tab="citation">Citation</button>
+  <button data-tab="rules">Court Rules</button>
+  <button data-tab="research">Research</button>
+  <button data-tab="scheduling">Scheduling</button>
+  <button data-tab="contacts">Contacts</button>
+  <button data-tab="help">Help</button>
+  <button data-tab="settings">Settings</button>
+</nav>
+
+<aside id="sidebar">
+  <div class="sb-header">
+    <h3>Recent Matters</h3>
+    <div class="sb-filters">
+      <button class="btn-secondary sb-filter" data-filter="all">All</button>
+      <button class="btn-secondary sb-filter" data-filter="files">With files</button>
+    </div>
+  </div>
+  <div id="recentMatters" class="sb-list" aria-label="Recent matters"></div>
+  <div class="sb-queue">
+    <h4>Upload Queue</h4>
+    <div id="uploadQueue">No active uploads</div>
+  </div>
+</aside>
+
+<main>
+  <!-- CHAT TAB -->
+  <section data-view="chat" class="active">
+    <h2>Chambers Chat</h2>
+    <form id="chatForm" class="chat-form">
+      <div class="chat-top">
+        <select id="caseSelect"><option value="">— Select matter —</option></select>
+        <input name="matter_id" placeholder="Matter ID (optional)">
+        <button id="saveMemo" type="button" class="btn-secondary">Save chat as memo</button>
+        <button id="exportDocx" type="button" class="btn-secondary" disabled>Export last draft (DOCX)</button>
+        <button id="privacyClear" type="button" class="btn-secondary danger">Privacy: Clear</button>
+      </div>
+      <textarea name="message" class="chat-big" placeholder="Tell me what to do (e.g., 'draft goal: MSJ on limitations; outline: ...')"></textarea>
+
+      <div class="toggle-bar">
+        <label class="toggle"><input type="checkbox" id="tgEvidence" checked> Evidence-only</label>
+        <label class="toggle"><input type="checkbox" id="tgStrict" checked> Strict citations</label>
+        <label class="toggle"><input type="checkbox" id="tgArgHead"> Argument-carrying headings</label>
+        <label class="toggle"><input type="checkbox" id="tgAskPresets" checked> Ask presets after first response</label>
+      </div>
+
+      <div class="tone-bar">
+        <span>Tone:</span>
+        <label><input type="radio" name="tone" value="neutral" checked> Neutral</label>
+        <label><input type="radio" name="tone" value="persuasive-medium"> Persuasive (med)</label>
+        <label><input type="radio" name="tone" value="persuasive-strong"> Persuasive (strong)</label>
+      </div>
+
+      <button>Send</button>
+    </form>
+    <div id="chatLog" class="chat-log" aria-live="polite"></div>
+
+    <!-- Chat upload -->
+    <div class="upload-zone" id="chatUploadZone">
+      <p>Drop files here for this matter or <button type="button" id="chatBrowseFiles" class="btn-secondary">Browse files</button></p>
+      <input type="file" id="chatFileInput" multiple hidden>
+      <div id="chatFileList" class="file-list"></div>
+    </div>
+  </section>
+
+  <!-- WORKFLOW TAB -->
+  <section data-view="workflow">
+    <h2>Workflow</h2>
+    <div class="persona-bar" id="pb-workflow" aria-label="Workflow personas"></div>
+    <div id="wfGate" class="wf-gate">Start a chat first. Presets and suggester appear after your first AI response.</div>
+    <div id="defensePresets" class="presets hidden"></div>
+    <div id="currentDials" class="dials hidden">
+      <div><b>Active Preset:</b> <span id="activePreset">None</span></div>
+      <div><b>Tone:</b> <span id="dialTone">neutral</span> • <b>Headings:</b> <span id="dialHeadings">descriptive</span> • <b>Evidence-only:</b> <span id="dialEvidence">true</span> • <b>Citations:</b> <span id="dialCites">strict</span></div>
+    </div>
+    <h3 class="hidden" id="suggHeader">Preset Suggester</h3>
+    <form id="presetForm" class="hidden">
+      <textarea name="complaint_text" placeholder="Paste complaint or case info"></textarea>
+      <input name="matter_id" placeholder="Matter ID (optional)">
+      <button>Suggest Preset</button>
+    </form>
+    <div id="presetOut" class="preset-out hidden"></div>
+  </section>
+
+  <!-- MATTERS TAB -->
+  <section data-view="matters">
+    <h2>Matters</h2>
+    <div class="persona-bar" id="pb-matters" aria-label="Matters personas"></div>
+    <div id="matters"></div>
+    <form id="newMatter">
+      <input name="title" placeholder="Title (Acme v. Beta)">
+      <input name="forum" placeholder="Forum (SC:Trial)">
+      <input name="client" placeholder="Client">
+      <button>Add Matter</button>
+    </form>
+  </section>
+
+  <!-- INITIAL REVIEW TAB -->
+  <section data-view="initial">
+    <h2>Initial Review — Primus (Initial Review)</h2>
+  <div class="multi-bar" id="mp-initial">
+    <label class="toggle"><input type="checkbox" id="mp-initial-on"> Multi-persona</label>
+    <label class="toggle"><input type="checkbox" id="mp-initial-debate"> Debate mode</label>
+    <button id="mp-initial-all" class="btn-secondary">Select All</button>
+    <button id="mp-initial-run" class="btn-primary">Run Compare</button>
+  </div>
+  <div id="mp-initial-out" class="multi-out hidden"></div>
+
+    <div class="persona-bar" id="pb-initial" aria-label="Initial Review personas"></div>
+    <form id="initReviewForm">
+      <input name="matter_id" placeholder="Matter ID (e.g., MAT001)">
+      <textarea name="facts" placeholder="Paste short facts (optional)"></textarea>
+      <button>Build Pack</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-initial">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+    <pre id="initReviewOut"></pre>
+  </section>
+
+  <!-- DRAFTER TAB -->
+  <section data-view="drafter">
+    <h2>Drafter — Aquila (Drafter)</h2>
+  <div class="multi-bar" id="mp-drafter">
+    <label class="toggle"><input type="checkbox" id="mp-drafter-on"> Multi-persona</label>
+    <label class="toggle"><input type="checkbox" id="mp-drafter-debate"> Debate mode</label>
+    <button id="mp-drafter-all" class="btn-secondary">Select All</button>
+    <button id="mp-drafter-run" class="btn-primary">Run Compare</button>
+  </div>
+  <div id="mp-drafter-out" class="multi-out hidden"></div>
+
+    <div class="persona-bar" id="pb-drafter" aria-label="Drafter personas"></div>
+    <form id="draftForm">
+      <input name="matter_id" placeholder="Matter ID">
+      <input name="goal" placeholder="Goal (e.g., MSJ opening)">
+      <textarea name="outline" placeholder="Outline (one line per heading)"></textarea>
+      <textarea name="citations" placeholder="Citations (one per line)"></textarea>
+      <button>Draft</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-drafter">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+    <pre id="draftOut"></pre>
+  </section>
+
+  <!-- EDITOR TAB -->
+  <section data-view="editor">
+    <h2>Editor — Lucida (Editor)</h2>
+  <div class="multi-bar" id="mp-editor">
+    <label class="toggle"><input type="checkbox" id="mp-editor-on"> Multi-persona</label>
+    <label class="toggle"><input type="checkbox" id="mp-editor-debate"> Debate mode</label>
+    <button id="mp-editor-all" class="btn-secondary">Select All</button>
+    <button id="mp-editor-run" class="btn-primary">Run Compare</button>
+  </div>
+  <div id="mp-editor-out" class="multi-out hidden"></div>
+
+    <div class="persona-bar" id="pb-editor" aria-label="Editor personas"></div>
+    <form id="editForm">
+      <textarea name="text" placeholder="Paste text to clean up"></textarea>
+      <label>Max cut (0–0.3): <input name="max_cut" value="0.2"></label>
+      <button>Edit</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-editor">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+    <pre id="editOut"></pre>
+  </section>
+
+  <!-- CITATION TAB -->
+  <section data-view="citation">
+    <h2>Citation — Bluejay (Citation)</h2>
+    <div class="persona-bar" id="pb-citation" aria-label="Citation personas"></div>
+    <form id="citeForm">
+      <textarea name="text" placeholder="Paste text to lint"></textarea>
+      <input name="forum" value="SC:Trial">
+      <button>Lint</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-citation">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+    <pre id="citeOut"></pre>
+  </section>
+
+  <!-- COURT RULES TAB -->
+  <section data-view="rules">
+    <h2>Court-Rules — Docket (Court-Rules)</h2>
+    <div class="persona-bar" id="pb-rules" aria-label="Court Rules personas"></div>
+    <form id="rulesForm">
+      <textarea name="content" placeholder="Paste content to validate"></textarea>
+      <input name="forum" value="SC:Trial">
+      <input name="doc_type" value="brief">
+      <button>Validate</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-rules">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+    <pre id="rulesOut"></pre>
+  </section>
+
+  <!-- RESEARCH TAB -->
+  <section data-view="research">
+    <h2>Research — Stacks (Research-RAG)</h2>
+    <div class="persona-bar" id="pb-research" aria-label="Research personas"></div>
+    <form id="ragForm">
+      <input name="matter_id" placeholder="Matter ID">
+      <input name="query" placeholder="Search query">
+      <button>Search</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-research">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+    <pre id="ragOut"></pre>
+  </section>
+
+  <!-- SCHEDULING TAB -->
+  <section data-view="scheduling">
+    <h2>Scheduling — Metron (Scheduling)</h2>
+    <div class="persona-bar" id="pb-scheduling" aria-label="Scheduling personas"></div>
+    <form id="schedForm">
+      <input name="forum" value="SC:Trial">
+      <input name="trigger_id" value="service_of_complaint">
+      <input name="datetime" value="2025-03-03T10:00:00-05:00">
+      <select name="service_method">
+        <option value="">—service method—</option>
+        <option value="personal">personal</option>
+        <option value="mail">mail (+3)</option>
+      </select>
+      <button>Compute</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-sched">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+    <pre id="schedOut"></pre>
+  </section>
+
+  <!-- CONTACTS TAB -->
+  <section data-view="contacts">
+    <h2>Contacts</h2>
+    <div class="persona-bar" id="pb-contacts" aria-label="Contacts personas"></div>
+
+    <div id="contactSearchBar" class="contacts-search">
+      <input id="contactQ" placeholder="Search by name, role, org, email…">
+      <select id="contactRole">
+        <option value="">Role: Any</option>
+        <option>Opposing Counsel</option>
+        <option>Judge</option>
+        <option>Client</option>
+        <option>Expert</option>
+        <option>Adjuster</option>
+      </select>
+      <select id="contactMatter"><option value="">Matter: Any</option></select>
+      <label class="toggle"><input type="checkbox" id="contactHasEmail"> Has email</label>
+      <button id="contactClear" class="btn-secondary">Clear</button>
+    </div>
+
+    <div class="contacts-bar">
+      <div class="left">
+        <button id="contactViewToggle" class="btn-secondary">Switch to Table View</button>
+      </div>
+      <div class="right bulk-actions hidden" id="contactsBulkBar">
+        <label><input type="checkbox" id="contactsSelectAll"> Select all</label>
+        <select id="contactsBulkMatter"><option value="">Link to matter…</option></select>
+        <button id="contactsBulkLink" class="btn-secondary">Link</button>
+        <button id="contactsBulkExport" class="btn-secondary">Export CSV</button>
+        <button id="contactsBulkDelete" class="btn-secondary danger">Delete</button>
+      </div>
+    </div>
+
+    <div id="contactResults" class="contacts-results"></div>
+    <div id="contactTableWrap" class="contacts-table hidden">
+      <table id="contactsTable">
+        <thead>
+          <tr class="head">
+            <th class="sticky-col"><input type="checkbox" id="ctSelectAll"></th>
+            <th class="sticky-col sort" data-col="name">Name</th>
+            <th class="sort" data-col="roles">Roles</th>
+            <th class="sort" data-col="org">Org</th>
+            <th class="sort" data-col="emails">Emails</th>
+            <th class="sort" data-col="matters">Matters</th>
+            <th class="sort" data-col="tags">Tags</th>
+            <th class="sort" data-col="note">Note</th>
+            <th class="sort" data-col="last_activity">Last Activity</th>
+            <th>Actions</th>
+          </tr>
+          <tr class="filters">
+            <th></th>
+            <th><input id="f_name" placeholder="Filter name"></th>
+            <th><input id="f_roles" placeholder="Judge, OC, …"></th>
+            <th><input id="f_org" placeholder="Filter org"></th>
+            <th><input id="f_emails" placeholder="Filter emails"></th>
+            <th><input id="f_matters" placeholder="Filter matters"></th>
+            <th><input id="f_tags" placeholder="Filter tags"></th>
+            <th><input id="f_note" placeholder="Filter note"></th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="contacts"></div>
+    <form id="newContact">
+      <input name="name" placeholder="Name">
+      <input name="role" placeholder="Role (Opposing Counsel)">
+      <input name="org" placeholder="Organization">
+      <input name="email" placeholder="Email">
+      <input name="matter_id" placeholder="Matter ID">
+      <button>Add Contact</button>
+    </form>
+    <div class="upload-zone" data-matter-input="input[name='matter_id']" id="zone-contacts">
+      <p>Drop files here (or <button type="button" class="btn-secondary browse-btn">Browse files</button>)</p>
+      <input type="file" class="file-input" multiple hidden>
+      <div class="file-list"></div>
+    </div>
+  </section>
+
+  <!-- HELP TAB -->
+  <section data-view="help">
+    <h2>Help</h2>
+    <p>Use Chat to drive everything. Each tool has its own tab and persona bar; uploads attach to the active matter. Save chat as memo; export drafts to DOCX.</p>
+  
+  <h3>Concordia (Synthesis)</h3>
+  <p>Concordia is a synthesis tool in your stack. When you run Multi‑persona Compare (with optional Debate mode), Concordia merges the persona outputs into a concise summary with agreements, disagreements, risks, and next steps. It does not replace your drafting persona; it combines them.</p>
+</section>
+
+  <!-- SETTINGS TAB -->
+  <section data-view="settings">
+    <h2>Settings — Personas</h2>
+    <div class="persona-sets">
+      <label>Persona Set:
+        <select id="personaSet">
+          <option value="defense_standard">Defense Standard</option>
+          <option value="dispositive_first">Dispositive First</option>
+          <option value="removal_rebase">Removal & Rebase</option>
+          <option value="employment_agency">Employment Agency Stage</option>
+        </select>
+      </label>
+      <button id="applyPersonaSet">Apply Set</button>
+    </div>
+    <div id="personaBadges" class="badges" aria-label="Persona Badges"></div>
+  </section>
+</main>
+
+<div id="previewModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-inner">
+    <div class="modal-head">
+      <div id="previewTitle">Preview</div>
+      <div>
+        <button id="openNewTab" class="btn-secondary">Open in new tab</button>
+        <button id="closePreview" class="btn-secondary">Close</button>
+      </div>
+    </div>
+    <div class="modal-body"><embed id="previewFrame" type="application/pdf"></div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>

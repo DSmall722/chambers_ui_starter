@@ -1,0 +1,100 @@
+
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#0a0f1a;color:#e5e7eb}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #1e293b;background:#0d1320;position:sticky;top:0;z-index:10}
+h1{font-size:16px;margin:0}
+.controls input{width:280px}
+.controls button{margin-left:6px}
+
+.tabs{display:flex;gap:8px;padding:8px;border-bottom:1px solid #1e293b;background:#0d1320;position:sticky;top:48px;z-index:9}
+.tabs button{background:#0b1220;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:6px 10px;cursor:pointer}
+.tabs button.active{background:#1e293b;border-color:#2563eb}
+main{padding:12px}
+
+section[data-view]{display:none}
+section[data-view].active{display:block}
+
+.chat-big{width:100%;min-height:120px;margin:8px 0}
+.chat-log{border:1px solid #334155;border-radius:8px;min-height:180px;max-height:340px;overflow:auto;padding:8px;background:#0b1220}
+.msg{margin:10px 0;display:flex;gap:8px}
+.msg .role{min-width:90px;opacity:.7}
+.msg .bubble{background:#0e1522;border:1px solid #334155;border-radius:10px;padding:8px;flex:1;white-space:pre-wrap}
+
+.toggle-bar,.tone-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.btn-secondary{background:#0b1220;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:6px 10px;cursor:pointer}
+.btn-secondary:hover{background:#0f1a2a}
+.hidden{display:none}
+
+.upload-zone{border:2px dashed #334155;border-radius:8px;padding:10px;text-align:center;background:#0b1220;margin-top:10px}
+.upload-zone.drag{background:#0f1a2a}
+.file-list{margin-top:8px; display:flex; flex-direction:column; gap:6px}
+.file-item{display:flex; flex-direction:column; gap:6px; padding:6px; border:1px dashed #334155; border-radius:6px; background:#0b1220}
+.file-item .row-actions{display:flex;gap:6px;align-items:center}
+.file-item .tagbar{display:flex;gap:6px;align-items:center}
+.file-item textarea.note-input{width:100%;min-height:54px}
+
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.badge{display:inline-flex;gap:6px;align-items:center;border:1px solid #334155;border-radius:999px;padding:6px 10px;background:#0b1220}
+.badge .name{font-weight:600}
+.badge .role{opacity:.7;font-size:12px}
+
+.persona-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 10px}
+.persona-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #334155;background:#0b1220;cursor:pointer}
+.persona-chip.active{background:#1e293b;border-color:#2563eb}
+.persona-chip .name{font-weight:600}
+.persona-chip .role{opacity:.75;font-size:12px}
+.persona-desc{width:100%;font-size:12px;color:#93a4b7;margin-top:2px}
+
+#sidebar{position:fixed;left:0;top:52px;bottom:0;width:300px;background:#0d1320;border-right:1px solid #1e293b;overflow:auto;padding:10px}
+main{margin-left:300px}
+.sb-header{display:flex;flex-direction:column;gap:8px}
+.sb-filters{display:flex;gap:6px;flex-wrap:wrap}
+.sb-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.sb-item{border:1px solid #334155;border-radius:8px;padding:8px;background:#0b1220;display:flex;gap:8px;align-items:center}
+.sb-item .meta{font-size:12px;opacity:.8}
+.sb-item .badges{margin-left:auto;display:flex;gap:6px}
+.badge-mini{font-size:11px;padding:2px 6px;border:1px solid #334155;border-radius:999px;background:#0f172a}
+.sb-actions{display:flex;gap:6px;margin-top:6px}
+.sb-item:hover{background:#0f1a2a;cursor:pointer}
+.sb-queue{margin-top:12px;border-top:1px dashed #334155;padding-top:8px}
+
+.modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal.active{display:flex}
+.modal-inner{background:#0b1220;border:1px solid #334155;border-radius:8px;width:90vw;height:85vh;display:flex;flex-direction:column}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #334155}
+.modal-body{flex:1;overflow:auto}
+.modal-body embed{width:100%;height:100%}
+
+.contacts-search{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.contacts-results{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.contact-row{border:1px solid #334155;border-radius:8px;padding:8px;background:#0b1220}
+.contact-head{display:flex;gap:8px;align-items:center}
+.contact-head .name{font-weight:600}
+.contact-head .roles{font-size:12px;opacity:.85}
+.contact-head .right{margin-left:auto;display:flex;gap:6px;align-items:center}
+.contact-body{margin-top:6px;font-size:13px;color:#b8c0cc}
+.hl{background:#374151;border-radius:3px;padding:0 2px}
+
+.contacts-bar{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.contacts-table{margin-top:8px;overflow:auto;border:1px solid #334155;border-radius:8px}
+.contacts-table table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}
+.contacts-table thead tr.head th{position:sticky;top:0;background:#0e1522;border-bottom:1px solid #334155;z-index:2}
+.contacts-table .sticky-col{position:sticky;left:0;background:#0e1522;z-index:3}
+.contacts-table tbody td.sticky-col{background:#0b1220}
+.contacts-table th, .contacts-table td{padding:8px;border-bottom:1px solid #1e293b;text-align:left;vertical-align:top}
+.contacts-table tr:hover td{background:#0f1a2a}
+.contacts-table th.sort{cursor:pointer}
+.contacts-table thead tr.filters input{width:100%}
+.bulk-actions .danger{border-color:#7f1d1d;background:#3f0d0d}
+
+/* Multi-persona */
+.multi-bar{display:flex;gap:8px;align-items:center;margin:10px 0}
+.btn-primary{padding:10px 14px;border:1px solid #2563eb;background:#1e40af;border-radius:8px}
+.btn-primary:hover{background:#1d4ed8}
+.multi-out{margin:10px 0;display:flex;flex-direction:column;gap:10px}
+.multi-out.hidden{display:none}
+.multi-card{border:1px solid #334155;border-radius:10px;background:#0b1220;padding:10px}
+.multi-card .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.multi-card .title{font-weight:600}
+.multi-card .body{white-space:pre-wrap;line-height:1.45}
+.synthesis{border-color:#2563eb}
+.progress{font-size:12px;opacity:.8}

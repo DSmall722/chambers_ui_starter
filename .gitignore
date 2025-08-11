@@ -1,0 +1,14 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+frontend/dist/
+
+# App data / private stuff
+backend/data/
+*.env
+*.zip
+.DS_Store
