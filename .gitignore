@@ -12,3 +12,12 @@ backend/data/
 *.env
 *.zip
 .DS_Store
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+frontend/dist/
+backend/data/
+*.env
+*.zip
+.DS_Store
