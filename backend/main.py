@@ -455,12 +455,13 @@ class MultiRunOut(BaseModel):
     trace_id: str
 
 def _mp_synthesize(runs: Dict[str, Dict[str, Any]], tool: str, personas: List[str], debate: bool) -> Dict[str, Any]:
-    # Trivial synthesizer: join key points; real model can be wired later.
-    parts = [f"**Synthesis — {tool}**",
-             f"Personas: {', '.join(personas)}",
-             f"Debate mode: {'ON' if debate else 'OFF'}",
-             ""]
-    # Collect "text" fields and naive dedupe lines
+    # Build a simple synthesis from persona texts.
+    parts = [
+        f"**Synthesis — {tool}**",
+        f"Personas: {', '.join(personas)}",
+        f"Debate mode: {'ON' if debate else 'OFF'}",
+        ""
+    ]
     seen = set()
     for name, r in runs.items():
         text = (r.get("text") or "").splitlines()
@@ -473,55 +474,56 @@ def _mp_synthesize(runs: Dict[str, Dict[str, Any]], tool: str, personas: List[st
                 continue
             seen.add(key)
             parts.append(f"- {s}")
-    return {"text": "
-".join(parts), "sources": []}
+    return {"text": "\\n".join(parts), "sources": []}
 
 def _mp_markdown(matter_id: str, tool: str, personas: List[str], synthesis: Dict[str, Any], runs: Dict[str, Dict[str, Any]], rounds: int, debate: bool) -> str:
+    from datetime import datetime
     ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-    lines = [f"# Multi-Persona Synthesis — {matter_id}",
-             f"*Tool:* {tool}  ",
-             f"*Personas:* {', '.join(personas)}  ",
-             f"*Rounds:* {rounds}  *Debate:* {'ON' if debate else 'OFF'}  ",
-             f"*Generated:* {ts}",
-             "",
-             "## Synthesis (Concordia)",
-             synthesis.get("text",""),
-             ""]
+    lines = [
+        f"# Multi-Persona Synthesis — {matter_id}",
+        f"*Tool:* {tool}  ",
+        f"*Personas:* {', '.join(personas)}  ",
+        f"*Rounds:* {rounds}  *Debate:* {'ON' if debate else 'OFF'}  ",
+        f"*Generated:* {ts}",
+        "",
+        "## Synthesis (Concordia)",
+        synthesis.get("text",""),
+        ""
+    ]
     for p, r in runs.items():
         lines += [f"## {p}", r.get("text",""), ""]
         srcs = r.get("sources") or []
         if srcs:
             lines += ["**Sources**"] + [f"- {s}" for s in srcs] + [""]
-    return "
-".join(lines)
+    return "\\n".join(lines)
 
 @app.post("/tool/multi_run")
 def tool_multi_run(req: MultiRunReq):
-    # Placeholder persona executor. Replace with calls to your model endpoints later.
-    runs = {}
+    # Placeholder execution for each persona (swap with real model calls later).
+    runs: Dict[str, Dict[str, Any]] = {}
     for persona in req.personas:
-        # Construct a naive text block that echoes what would be done
         summary = [f"{persona} — {req.tool} run:"]
         keys = list(req.payload.keys())[:8]
         if keys:
             summary.append("Inputs: " + ", ".join(f"{k}={str(req.payload[k])[:40]}" for k in keys))
         if req.debate and req.rounds and req.rounds >= 2:
             summary.append("Round 2: critique phase (placeholder)")
-        runs[persona] = {"text": "
-".join(summary), "sources": []}
+        runs[persona] = {"text": "\\n".join(summary), "sources": []}
 
     synthesis = _mp_synthesize(runs, req.tool, req.personas, bool(req.debate))
-    trace_id = datetime.utcnow().strftime("mp-%Y%m%d-%H%M%S")
+    trace_id = __import__("datetime").datetime.utcnow().strftime("mp-%Y%m%d-%H%M%S")
+
     # Auto-save memo
     try:
         md = _mp_markdown(req.matter_id or "UNKNOWN", req.tool, req.personas, synthesis, runs, req.rounds or 1, bool(req.debate))
+        import os
         memdir = os.path.join(DATA_DIR, "memos")
         os.makedirs(memdir, exist_ok=True)
         safe = (req.matter_id or "UNKNOWN").replace("/", "_")
         fname = f"multi-{safe}-{trace_id}.md"
         with open(os.path.join(memdir, fname), "w", encoding="utf-8") as f:
             f.write(md)
-    except Exception as e:
+    except Exception:
         pass
 
     return {"runs": runs, "synthesis": synthesis, "trace_id": trace_id}
@@ -533,10 +535,11 @@ class MultiSaveMemo(BaseModel):
 
 @app.post("/multi/save_memo")
 def multi_save_memo(req: MultiSaveMemo):
+    import os
     memdir = os.path.join(DATA_DIR, "memos")
     os.makedirs(memdir, exist_ok=True)
     safe = req.matter_id.replace("/", "_")
-    ts = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    ts = __import__("datetime").datetime.utcnow().strftime("%Y%m%d-%H%M%S")
     fname = f"{req.title.replace(' ', '_')}-{safe}-{ts}.md"
     path = os.path.join(memdir, fname)
     with open(path, "w", encoding="utf-8") as f:
