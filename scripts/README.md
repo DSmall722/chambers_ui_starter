@@ -1,0 +1,1 @@
+# One‑Click Helpers (macOS)
